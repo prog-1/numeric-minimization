@@ -2,12 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math"
 )
-
-func s(x float64) float64 {
-	return 0.1*x*x - math.Sqrt(97)*x + 10
-}
 
 func FindMinBisect(f func(x float64) float64, startx, endx float64, e float64) float64 {
 	d := e / 2
@@ -23,5 +18,5 @@ func FindMinBisect(f func(x float64) float64, startx, endx float64, e float64) f
 }
 
 func main() {
-	fmt.Println(FindMinBisect(s, 20, 80, 0.000001))
+	fmt.Println(FindMinBisect(t1, 20, 80, 0.000001))
 }
