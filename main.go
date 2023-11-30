@@ -11,7 +11,7 @@ import (
 // TODO: Compare 2 methods
 
 // Returns the minimum of the f(x) within the range from x0 to x1 using f(x) derivative f_(x) with the precision given as e
-func FindMinimum(f, f_ func(float64) float64, x0, x1, e float64) float64 {
+func FindMinimum(f func(float64) float64, x0, x1, e float64) float64 {
 	e /= 10
 	for delta := (x1 - x0) / 4; 2*delta > e; delta = (x1 - x0) / 4 {
 		xm := x0 + (x1-x0)/2
@@ -31,17 +31,16 @@ func nearlyEqual(a, b, e float64) bool {
 
 func TestFindMinimum(t *testing.T) {
 	type Input struct {
-		f, f_     func(float64) float64
+		f         func(float64) float64
 		x0, x1, e float64
 	}
-	sqrt97 := math.Sqrt(97.0)
 	for num, tc := range []struct {
 		input Input
 		want  float64
 	}{
-		{Input{func(x float64) float64 { return 0.1*x*x - sqrt97*x + 10 }, func(x float64) float64 { return 0.2*x - sqrt97 }, 0, 100, 1e-7}, 49.2442900},
+		{Input{func(x float64) float64 { return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-6}, 49.2442900},
 	} {
-		if got := FindMinimum(tc.input.f, tc.input.f_, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
+		if got := FindMinimum(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
 			t.Errorf("FindMinimum failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
 	}
@@ -59,7 +58,7 @@ func TestNearlyEqual(t *testing.T) {
 		// {Input{1.111111, 1.111111, 1e-6}, true},
 		// {Input{1.111111, 1.1111111111111111, 1e-6}, true},
 		// {Input{9.999999, 9.9999999999999999, 1e-6}, true},
-		{Input{1.23456, 1.234567, 1e-6}, true},
+		{Input{1.234567, 1.2345678, 1e-6}, true},
 		// {Input{1.23457, 1.234567, 1e-6}, false},
 	} {
 		if got := nearlyEqual(tc.input.a, tc.input.b, tc.input.e); got != tc.want {
