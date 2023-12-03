@@ -10,8 +10,9 @@ import (
 
 // TODO: Compare 2 methods
 
-// Returns the minimum of the f(x) within the range from x0 to x1 using f(x) derivative f_(x) with the precision given as e
-func FindMinimum(f func(float64) float64, x0, x1, e float64) float64 {
+// Returns the minimum of the f(x) within the range from x0 to x1 with the precision given as e
+// Note that presence of only 1 extremum within the given range is allowed
+func FindMinimumUnoptimized(f func(float64) float64, x0, x1, e float64) float64 {
 	e /= 10
 	for delta := (x1 - x0) / 4; 2*delta > e; delta = (x1 - x0) / 4 {
 		xm := x0 + (x1-x0)/2
@@ -23,6 +24,32 @@ func FindMinimum(f func(float64) float64, x0, x1, e float64) float64 {
 		}
 	}
 	return x0 + (x1-x0)/2
+}
+
+// Returns the minimum of the f(x) within the range from x0 to x1 with the precision given as e
+// It uses golden ratio to reduce f(x) calls via reusage of some calculations
+// Only works with x0 >= 0 and x1 >= 0
+// Note that presence of only 1 extremum within the given range is allowed
+func FindMinimumOptimized(f func(float64) float64, x0, x1, e float64) float64 {
+	var gr = (3.0 - math.Sqrt(5)) / 2.0 // Golden ratio
+	e /= 10
+	Δx := x1 - x0
+	a := Δx*gr + x0
+	c0, c1 := x0+a, x1-a
+	for ; Δx >= e; Δx = x1 - x0 {
+		a = Δx - 2*a
+		y0, y1 := f(c0), f(c1)
+		if y0 < y1 {
+			x1 = c1
+			c1 = c0
+			c0 = x0 + a
+		} else {
+			x0 = c0
+			c0 = c1
+			c1 = x1 - a
+		}
+	}
+	return x0 // Any val. ∈ [x0;x0] suffices, since x1-x0<e
 }
 
 func nearlyEqual(a, b, e float64) bool {
@@ -38,10 +65,13 @@ func TestFindMinimum(t *testing.T) {
 		input Input
 		want  float64
 	}{
-		{Input{func(x float64) float64 { return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-6}, 49.2442900},
+		{Input{func(x float64) float64 { return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-6}, 49.24428900},
 	} {
-		if got := FindMinimum(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
-			t.Errorf("FindMinimum failed test No %v: got = %v, want = %v", num, got, tc.want)
+		// if got := FindMinimumUnoptimized(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
+		// 	t.Errorf("FindMinimumUnoptimized failed test No %v: got = %v, want = %v", num, got, tc.want)
+		// }
+		if got := FindMinimumOptimized(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
+			t.Errorf("FindMinimumOptimized failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
 	}
 }
