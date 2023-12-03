@@ -79,7 +79,6 @@ func TestFindMinimum(t *testing.T) {
 			t.Errorf("FindMinimumGoldenRatio failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
 		fmt.Printf("Golden ratio method f(x) call count: %v\n", fxCalls)
-		// Why on Earth does the optimized method perform worse?
 	}
 }
 
