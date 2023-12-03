@@ -34,19 +34,23 @@ func FindMinimumGoldenRatio(f func(float64) float64, x0, x1, e float64) float64 
 	a := dx*gr + x0
 	c0, c1 := x0+a, x1-a
 	y0, y1 := f(c0), f(c1)
+	l := func() {} // For lazy evaluation
 	for ; dx >= e; dx = x1 - x0 {
+		l()
 		a = dx - 2*a
 		if y0 < y1 {
 			x1, c1, c0 = c1, c0, x0+a
-			y1, y0 = y0, f(c0)
+			y1 = y0
+			l = func() { y0 = f(c0) }
 		} else {
 			x0, c0, c1 = c0, c1, x1-a
-			y0, y1 = y1, f(c1)
+			y0 = y1
+			l = func() { y1 = f(c1) }
 		}
 		i++
 	}
 	fmt.Printf("Golden ratio method iteration count: %v\n", i)
-	return x0 // Any val. ∈ [x0;x0] suffices, since x1-x0<e
+	return x0 // Any val. ∈ [x0;x0] suffices since x1-x0<e
 }
 
 func nearlyEqual(a, b, e float64) bool {
