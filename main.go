@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -8,6 +9,7 @@ import (
 // Returns the minimum of the f(x) within the range from x0 to x1 with the precision given as e
 // Note that presence of only 1 extremum within the given range is allowed
 func FindMinimumUnoptimized(f func(float64) float64, x0, x1, e float64) float64 {
+	var i uint
 	for delta := (x1 - x0) / 4; 2*delta > e; delta = (x1 - x0) / 4 {
 		xm := x0 + (x1-x0)/2
 		c0, c1 := f(xm-delta), f(xm+delta)
@@ -16,7 +18,9 @@ func FindMinimumUnoptimized(f func(float64) float64, x0, x1, e float64) float64 
 		} else {
 			x0 = xm
 		}
+		i++
 	}
+	fmt.Printf("Unoptimised method iteration count: %v\n", i)
 	return x0 + (x1-x0)/2
 }
 
@@ -24,7 +28,8 @@ func FindMinimumUnoptimized(f func(float64) float64, x0, x1, e float64) float64 
 // It uses golden ratio to reduce f(x) calls via reusage of some calculations
 // Only works with x0 >= 0 and x1 >= 0
 // Note that presence of only 1 extremum within the given range is allowed
-func FindMinimumOptimized(f func(float64) float64, x0, x1, e float64) float64 {
+func FindMinimumOptimised(f func(float64) float64, x0, x1, e float64) float64 {
+	var i uint
 	var gr = (3.0 - math.Sqrt(5)) / 2.0 // Golden ratio
 	Δx := x1 - x0
 	a := Δx*gr + x0
@@ -37,7 +42,9 @@ func FindMinimumOptimized(f func(float64) float64, x0, x1, e float64) float64 {
 		} else {
 			x0, c0, c1 = c0, c1, x1-a
 		}
+		i++
 	}
+	fmt.Printf("Optimised method iteration count: %v\n", i)
 	return x0 // Any val. ∈ [x0;x0] suffices, since x1-x0<e
 }
 
@@ -46,6 +53,7 @@ func nearlyEqual(a, b, e float64) bool {
 }
 
 func TestFindMinimum(t *testing.T) {
+	var fxCalls uint
 	type Input struct {
 		f         func(float64) float64
 		x0, x1, e float64
@@ -54,14 +62,17 @@ func TestFindMinimum(t *testing.T) {
 		input Input
 		want  float64
 	}{
-		{Input{func(x float64) float64 { return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-5}, 49.24428900},
+		{Input{func(x float64) float64 { fxCalls++; return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-5}, 49.24428900},
 	} {
 		if got := FindMinimumUnoptimized(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
-			t.Errorf("FindMinimumUnoptimized failed test No %v: got = %v, want = %v", num, got, tc.want)
+			t.Errorf("FindMinimumUnoptimised failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
-		if got := FindMinimumOptimized(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
-			t.Errorf("FindMinimumOptimized failed test No %v: got = %v, want = %v", num, got, tc.want)
+		fmt.Printf("Unoptimised method f(x) call count: %v\n", fxCalls)
+		fxCalls = 0
+		if got := FindMinimumOptimised(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
+			t.Errorf("FindMinimumOptimised failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
+		fmt.Printf("Optimised method f(x) call count: %v\n", fxCalls)
 	}
 }
 
