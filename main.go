@@ -10,7 +10,7 @@ import (
 // Note that presence of only 1 extremum within the given range is allowed
 func FindMinimumBisect(f func(float64) float64, x0, x1, e float64) float64 {
 	var i uint
-	for delta := (x1 - x0) / 4; 2*delta > e; delta = (x1 - x0) / 4 {
+	for delta := (x1 - x0) / 4; delta > 2*e; delta = (x1 - x0) / 4 {
 		xm := x0 + (x1-x0)/2
 		c0, c1 := f(xm-delta), f(xm+delta)
 		if c0 < c1 {
@@ -33,13 +33,15 @@ func FindMinimumGoldenRatio(f func(float64) float64, x0, x1, e float64) float64 
 	Δx := x1 - x0
 	a := Δx*gr + x0
 	c0, c1 := x0+a, x1-a
+	y0, y1 := f(c0), f(c1)
 	for ; Δx >= e; Δx = x1 - x0 {
 		a = Δx - 2*a
-		y0, y1 := f(c0), f(c1)
 		if y0 < y1 {
 			x1, c1, c0 = c1, c0, x0+a
+			y1, y0 = y0, f(c0)
 		} else {
 			x0, c0, c1 = c0, c1, x1-a
+			y0, y1 = y1, f(c1)
 		}
 		i++
 	}
