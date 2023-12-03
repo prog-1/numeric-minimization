@@ -63,6 +63,7 @@ func TestFindMinimum(t *testing.T) {
 		want  float64
 	}{
 		{Input{func(x float64) float64 { fxCalls++; return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-5}, 49.24428900},
+		// {Input{func(x float64) float64 { fxCalls++; return 0.1*x*x - math.Sqrt(97.0)*x + 10 }, 0, 100, 1e-6}, 49.24428900}, // They will both fail
 	} {
 		if got := FindMinimumUnoptimized(tc.input.f, tc.input.x0, tc.input.x1, tc.input.e); !nearlyEqual(got, tc.want, tc.input.e) {
 			t.Errorf("FindMinimumUnoptimised failed test No %v: got = %v, want = %v", num, got, tc.want)
@@ -73,6 +74,7 @@ func TestFindMinimum(t *testing.T) {
 			t.Errorf("FindMinimumOptimised failed test No %v: got = %v, want = %v", num, got, tc.want)
 		}
 		fmt.Printf("Optimised method f(x) call count: %v\n", fxCalls)
+		// Why on Earth does the optimized method perform worse?
 	}
 }
 
