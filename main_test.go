@@ -5,10 +5,6 @@ import (
 	"testing"
 )
 
-func t1(x float64) float64 {
-	return 0.1*x*x - math.Sqrt(97)*x + 10
-}
-
 func t2(x float64) float64 {
 	return x*x - 10*x
 }
@@ -30,6 +26,9 @@ func TestFindMinBisect(t *testing.T) {
 	} {
 		if res := FindMinBisect(tc.f, tc.startx, tc.endx, tc.eps); math.Abs(tc.res-res) > tc.eps {
 			t.Errorf("FindMinBisect(%s, %f, %f, %f) = %f, want ~ %f`", tc.name, tc.startx, tc.endx, tc.eps, res, tc.res)
+		}
+		if res := FindMinGoldenRatio(tc.f, tc.startx, tc.endx, tc.eps); math.Abs(tc.res-res) > tc.eps {
+			t.Errorf("FindMinGoldenRatio(%s, %f, %f, %f) = %f, want ~ %f`", tc.name, tc.startx, tc.endx, tc.eps, res, tc.res)
 		}
 	}
 }
